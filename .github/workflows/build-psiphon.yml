@@ -66,6 +66,12 @@ jobs:
           cp app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java.stub \
              app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java
           test -s app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java
+      
+      - name: Install NDK system dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtinfo5
+          ldconfig -p | grep libtinfo.so.5
 
       - name: Build Debug APK
         run: |
