@@ -60,6 +60,12 @@ jobs:
             'STORE_PASSWORD=android' \
             'KEY_ALIAS=ci' \
             'KEY_PASSWORD=android' > signing.properties
+      
+      - name: Generate EmbeddedValues.java
+        run: |
+          cp app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java.stub \
+             app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java
+          test -s app/src/main/java/com/psiphon3/psiphonlibrary/EmbeddedValues.java
 
       - name: Build Debug APK
         run: |
