@@ -16,8 +16,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout source
+            - name: Checkout source
         uses: actions/checkout@v7
+        with:
+          lfs: true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v6
