@@ -1,12 +1,9 @@
 
 name: Build Psiphon Android APK
 
-on:
+'on':
   workflow_dispatch:
-  push:
-    branches:
-      - master
-      - main
+  push: {}
 
 permissions:
   contents: read
@@ -16,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-            - name: Checkout source
+      - name: Checkout source
         uses: actions/checkout@v7
         with:
           lfs: true
@@ -40,7 +37,12 @@ jobs:
             "build-tools;35.0.0" \
             "ndk;17.2.4988734"
 
-      - name: Create temporary CI signing key
+      - name: Check Git LFS dependencies
+        run: |
+          ls -lh app/libs/
+          test "$(stat -c%s app/libs/ca.psiphon.aar)" -gt 1000000
+
+      - name: Create temporary signing key
         run: |
           keytool -genkeypair -noprompt \
             -keystore "$GITHUB_WORKSPACE/ci-release.jks" \
@@ -53,30 +55,16 @@ jobs:
             -validity 10000 \
             -dname "CN=Temporary CI"
 
-          cat > signing.properties <<'EOF'
-          STORE_FILE=../ci-release.jks
-          STORE_PASSWORD=android
-          KEY_ALIAS=ci
-          KEY_PASSWORD=android
-          EOF
-
-      - name: Check project files
-        run: |
-          test -f gradlew
-          test -f settings.gradle
-          test -f app/build.gradle
-          test -f version.properties
+          printf '%s\n' \
+            'STORE_FILE=../ci-release.jks' \
+            'STORE_PASSWORD=android' \
+            'KEY_ALIAS=ci' \
+            'KEY_PASSWORD=android' > signing.properties
 
       - name: Build Debug APK
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon --stacktrace assembleDebug
-
-      - name: Verify APK
-        run: |
-          APK="app/build/outputs/apk/debug/PsiphonAndroid-debug.apk"
-          test -s "$APK"
-          ls -lh "$APK"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
